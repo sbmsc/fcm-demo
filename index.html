@@ -1,0 +1,109 @@
+<html>
+  <head>
+    <title>FCM NOTIFICATION</title>
+    <!-- <link rel="stylesheet" href="/stylesheets/style.css" /> -->
+  </head>
+
+  <body>
+    <p>' , &#39;</p>
+    <!-- The core Firebase JS SDK is always required and must be listed first -->
+    <script src="https://www.gstatic.com/firebasejs/6.5.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/6.5.0/firebase-messaging.js"></script>
+    <!-- TODO: Add SDKs for Firebase products that you want to use
+      https://firebase.google.com/docs/web/setup#config-web-app -->
+
+    <script>
+      // Your web app's Firebase configuration
+
+      const firebaseConfig = {
+        apiKey: "AIzaSyBcN-dMN_bKSKZt6MQoaeHCZKyZRh-1hU0",
+        authDomain: "lb-notification-test.firebaseapp.com",
+        databaseURL: "https://lb-notification-test.firebaseio.com",
+        projectId: "lb-notification-test",
+        storageBucket: "lb-notification-test.appspot.com",
+        messagingSenderId: "283544208890",
+        appId: "1:283544208890:web:74baace3a58871a3"
+      };
+      // Initialize Firebase
+      firebase.initializeApp(firebaseConfig);
+      const messaging = firebase.messaging();
+      messaging.usePublicVapidKey(
+        "BNx2Dkag2RmG7PWrYPpG2qMkRDLFkV3sQ5Cq8E2C5N4sS9VXf3BZcxRHQ-bJevXSubI7QDFYFwWWKrDKx2zkPrw"
+      );
+      Notification.requestPermission().then(permission => {
+        if (permission === "granted") {
+          console.log("Notification permission granted.");
+          // TODO(developer): Retrieve an Instance ID token for use with FCM.
+          // ...
+          // Get Instance ID token. Initially this makes a network call, once retrieved
+          // subsequent calls to getToken will return from cache.
+          messaging
+            .getToken()
+            .then(currentToken => {
+              if (currentToken) {
+                sendTokenToServer(currentToken);
+                // updateUIForPushEnabled(currentToken);
+              } else {
+                // Show permission request.
+                console.log(
+                  "No Instance ID token available. Request permission to generate one."
+                );
+                // Show permission UI.
+                // updateUIForPushPermissionRequired();
+                // setTokenSentToServer(false);
+              }
+            })
+            .catch(err => {
+              console.log("An error occurred while retrieving token. ", err);
+              // showToken("Error retrieving Instance ID token. ", err);
+              // setTokenSentToServer(false);
+            });
+        } else {
+          console.log("Unable to get permission to notify.");
+        }
+      });
+      messaging.onTokenRefresh(() => {
+        messaging
+          .getToken()
+          .then(refreshedToken => {
+            console.log("Token refreshed.");
+            // Indicate that the new Instance ID token has not yet been sent to the
+            // app server.
+            // setTokenSentToServer(false);
+            // Send Instance ID token to app server.
+            sendTokenToServer(refreshedToken);
+            // ...
+          })
+          .catch(err => {
+            console.log("Unable to retrieve refreshed token ", err);
+          });
+      });
+      function sendTokenToServer(token) {
+        console.log(token);
+      }
+      messaging.onMessage(payload => {
+        console.log("Notification received");
+        console.log(payload);
+      });
+      messaging.setBackgroundMessageHandler(function(payload) {
+        console.log(
+          "[firebase-messaging-sw.js] Received background message ",
+          payload
+        );
+        // Customize notification here
+        const notificationTitle = "Background Message Title";
+        const notificationOptions = {
+          body: "Background Message body.",
+          icon: "/firebase-logo.png"
+        };
+
+        return self.registration.showNotification(
+          notificationTitle,
+          notificationOptions
+        );
+      });
+    </script>
+    <!-- <script src="./firebase-messaging-sw.js"></script> -->
+    <!-- <script src="./javascripts/script.js"></script> -->
+  </body>
+</html>
